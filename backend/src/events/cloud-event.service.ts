@@ -103,6 +103,118 @@ export class CloudEventService {
   }
 
   /**
+   * Publish agent.online event
+   */
+  async publishAgentOnline(agentId: string): Promise<void> {
+    const event: CloudEvent = {
+      specversion: '1.0',
+      type: 'hvo.agent.online',
+      source: 'hvo/heartbeat-service',
+      id: `${agentId}-${Date.now()}`,
+      time: new Date().toISOString(),
+      datacontenttype: 'application/json',
+      data: {
+        agent_id: agentId,
+        status: 'online',
+      },
+    };
+
+    await this.publishEvent('hvo:events', event);
+  }
+
+  /**
+   * Publish agent.offline event
+   */
+  async publishAgentOffline(agentId: string): Promise<void> {
+    const event: CloudEvent = {
+      specversion: '1.0',
+      type: 'hvo.agent.offline',
+      source: 'hvo/heartbeat-service',
+      id: `${agentId}-${Date.now()}`,
+      time: new Date().toISOString(),
+      datacontenttype: 'application/json',
+      data: {
+        agent_id: agentId,
+        status: 'offline',
+      },
+    };
+
+    await this.publishEvent('hvo:events', event);
+  }
+
+  /**
+   * Publish alert.created event
+   */
+  async publishAlertCreated(
+    alertId: string,
+    agentId: string,
+    level: string,
+  ): Promise<void> {
+    const event: CloudEvent = {
+      specversion: '1.0',
+      type: 'hvo.alert.created',
+      source: 'hvo/alert-service',
+      id: `${alertId}-${Date.now()}`,
+      time: new Date().toISOString(),
+      datacontenttype: 'application/json',
+      data: {
+        alert_id: alertId,
+        agent_id: agentId,
+        level,
+      },
+    };
+
+    await this.publishEvent('hvo:events', event);
+  }
+
+  /**
+   * Publish alert.escalated event
+   */
+  async publishAlertEscalated(
+    alertId: string,
+    agentId: string,
+    newLevel: string,
+    escalationCount: number,
+  ): Promise<void> {
+    const event: CloudEvent = {
+      specversion: '1.0',
+      type: 'hvo.alert.escalated',
+      source: 'hvo/alert-service',
+      id: `${alertId}-escalated-${Date.now()}`,
+      time: new Date().toISOString(),
+      datacontenttype: 'application/json',
+      data: {
+        alert_id: alertId,
+        agent_id: agentId,
+        level: newLevel,
+        escalation_count: escalationCount,
+      },
+    };
+
+    await this.publishEvent('hvo:events', event);
+  }
+
+  /**
+   * Publish alert.resolved event
+   */
+  async publishAlertResolved(alertId: string, agentId: string): Promise<void> {
+    const event: CloudEvent = {
+      specversion: '1.0',
+      type: 'hvo.alert.resolved',
+      source: 'hvo/alert-service',
+      id: `${alertId}-resolved-${Date.now()}`,
+      time: new Date().toISOString(),
+      datacontenttype: 'application/json',
+      data: {
+        alert_id: alertId,
+        agent_id: agentId,
+      },
+    };
+
+    await this.publishEvent('hvo:events', event);
+  }
+
+  /**
    * Cleanup Redis connection
    */
   async onModuleDestroy(): Promise<void> {

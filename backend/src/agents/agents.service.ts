@@ -266,6 +266,38 @@ export class AgentsService implements OnModuleInit {
   }
 
   /**
+   * Update agent status only (for heartbeat/monitoring)
+   * Used by HeartbeatMonitoringService to update online/offline status
+   */
+  async updateAgentStatus(agentId: string, status: 'online' | 'offline' | 'idle' | 'working'): Promise<Agent> {
+    const agent = await this.getAgent(agentId);
+
+    // Map heartbeat status to agent status enum
+    let agentStatus: AgentStatus;
+    if (status === 'online') {
+      agentStatus = 'idle'; // online → idle
+    } else if (status === 'offline') {
+      agentStatus = 'blocked'; // offline → blocked
+    } else if (status === 'idle' || status === 'working') {
+      agentStatus = status as AgentStatus;
+    } else {
+      agentStatus = 'idle';
+    }
+
+    agent.status = agentStatus;
+    agent.updated_at = new Date();
+
+    const updatedAgent = await this.agentRepository.save(agent);
+
+    // Update Redis cache
+    await this.redis.hset(`hvo:agent:${agentId}`, 'status', agentStatus);
+
+    this.logger.log(`Agent ${agentId} status updated to ${agentStatus} (from ${status})`);
+
+    return updatedAgent;
+  }
+
+  /**
    * Cleanup Redis connection
    */
   async onModuleDestroy(): Promise<void> {
