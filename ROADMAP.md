@@ -46,21 +46,49 @@
 
 ## Phase 2: Real Integration & Collaboration (Sprint 3-4: Oct 29-Nov 26)
 
-**Goal:** Real Hermes adapter + shared memory sync
+**Goal:** Real Hermes adapter + shared memory sync + heartbeat monitoring
 
-- [ ] Hermes adapter implementation (replace mock)
-- [ ] Agent heartbeat monitoring
-- [ ] Shared memory write/read (task-scoped Redis keys)
-- [ ] Conflict resolution (optimistic locking)
-- [ ] Meeting room logic (2+ agents discuss)
-- [ ] Memory indicator (float icon over avatar)
-- [ ] E2E test: task → decompose → assign → shared memory sync
+### Sprint 3 (Oct 29-Nov 12): Hermes Integration + Heartbeat
+- [x] PHASE_2_SPRINT_3_BACKLOG.md (detailed, day-by-day)
+- [x] HERMES_API_SPECIFICATION.md (endpoints, formats, errors)
+- [x] ARCHITECTURE_PHASE_2.md (component/sequence diagrams)
+- [ ] RealHermesAdapter implementation (task dispatch, event subscription)
+- [ ] HeartbeatMonitoringService (agent online/offline detection)
+- [ ] Agent status sync (Hermes ↔ HVO)
+- [ ] Pause/resume signals
+- [ ] Integration tests (task dispatch E2E)
+
+**Sprint 3 Deliverables:**
+- ✅ Real Hermes adapter working (100% task dispatch)
+- ✅ Heartbeat monitoring < 20s offline detection
+- ✅ Agent lifecycle complete (online/offline/recovery)
+- ✅ Unit + integration tests passing
+
+### Sprint 4 (Nov 12-Nov 26): Shared Memory + Polish + Deployment
+- [x] PHASE_2_SPRINT_4_BACKLOG.md (detailed, day-by-day)
+- [x] TESTING_STRATEGY_PHASE_2.md (unit, integration, E2E, stress tests)
+- [x] PHASE_2_RISKS_MITIGATIONS.md (critical risks + recovery)
+- [ ] SharedMemoryService (task-scoped Redis)
+- [ ] Conflict resolution (optimistic locking, retry, escalation)
+- [ ] Memory access indicators (UI events)
+- [ ] 5-agent E2E test (concurrent shared memory)
+- [ ] Stress test (100 concurrent writes)
+- [ ] Architecture + runbook documentation
+- [ ] Deploy to test environment
+
+**Sprint 4 Deliverables:**
+- ✅ Shared memory + conflict resolution working
+- ✅ Concurrent writes: zero data corruption
+- ✅ E2E test: 5 agents, 100% success
+- ✅ Phase 2 complete + ready for Phase 3
 
 **Success Criteria:**
-- Real Hermes agents execute tasks
-- 2+ agents write to same shared key without data loss
-- Meeting room shows agent interaction
-- Audit trail captures all memory operations
+- Real Hermes agents execute tasks (100% success)
+- Concurrent writes to shared memory (zero corruption)
+- Heartbeat monitoring < 20 seconds
+- Conflict resolution automatic (< 1% requires escalation)
+- Audit trail complete
+- All tests passing (60+, 88% coverage)
 
 ---
 
