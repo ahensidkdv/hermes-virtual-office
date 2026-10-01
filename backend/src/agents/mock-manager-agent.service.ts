@@ -1,6 +1,9 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { TasksService } from '../tasks/tasks.service';
+import { AgentsService } from './agents.service';
+import { OfficeService } from '../office/office.service';
+import { MockHermesAdapter } from '../adapters/mock-hermes.adapter';
 import { CloudEvent } from '../events/cloud-event.service';
 
 /**
@@ -22,7 +25,12 @@ export class MockManagerAgent implements OnModuleInit {
   private readonly maxConcurrentAgents = 7;
   private taskQueue: string[] = [];
 
-  constructor(private tasksService: TasksService) {
+  constructor(
+    private tasksService: TasksService,
+    private agentsService: AgentsService,
+    private officeService: OfficeService,
+    private hermesAdapter: MockHermesAdapter,
+  ) {
     // Main Redis client for publishing
     this.redis = new (require('ioredis'))({
       host: process.env.REDIS_HOST || 'localhost',
@@ -96,6 +104,7 @@ export class MockManagerAgent implements OnModuleInit {
   /**
    * Decompose a task into 2-4 subtasks
    * Mock decomposition strategy: split task title into subtasks
+   * Also assigns an idle agent to the first subtask
    */
   private async decomposeTask(taskId: string, taskTitle: string): Promise<void> {
     this.concurrentAgents++;
@@ -112,6 +121,36 @@ export class MockManagerAgent implements OnModuleInit {
 
       // Update parent task status: created → assigned
       await this.tasksService.updateTaskStatus(taskId, { status: 'assigned' });
+
+      // Try to assign task to an idle agent via Hermes adapter
+      const idleAgents = await this.agentsService.getAgentsByStatus('idle');
+      if (idleAgents.length > 0) {
+        const assignedAgent = idleAgents[0]; // Pick first idle agent
+        
+        // Dispatch task through Hermes adapter
+        const hermesTaskId = await this.hermesAdapter.dispatchTask(
+          taskId,
+          taskTitle,
+          assignedAgent.id,
+          { subtaskCount },
+        );
+
+        // Assign task to agent in database
+        await this.agentsService.assignTask(assignedAgent.id, taskId);
+
+        // Broadcast agent movement and status change
+        await this.officeService.broadcastAgentMove(
+          assignedAgent.id,
+          assignedAgent.position_x,
+          assignedAgent.position_y,
+          'work_desk_1',
+        );
+        await this.officeService.broadcastAgentStatus(assignedAgent.id, 'working');
+
+        this.logger.log(
+          `Task ${taskId} assigned to agent ${assignedAgent.id} (hermesTaskId: ${hermesTaskId})`,
+        );
+      }
 
       // Publish task.assigned event (for WebSocket broadcast)
       await this.publishTaskAssigned(taskId, subtasks.length);
