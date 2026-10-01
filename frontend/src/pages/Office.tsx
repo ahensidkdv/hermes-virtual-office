@@ -1,6 +1,7 @@
 import React from 'react';
 import { useOfficeStore } from '../store/office.store';
 import { useWebSocket } from '../hooks/useWebSocket';
+import { useOfficeAnimation } from '../hooks/useOfficeAnimation';
 import { useAgents } from '../hooks/useAgents';
 import { useTasks } from '../hooks/useTasks';
 import { OfficeCanvas } from '../components/OfficeCanvas';
@@ -10,6 +11,9 @@ import { DetailPanel } from '../components/DetailPanel';
 export const OfficePage: React.FC = () => {
   // Initialize WebSocket connection
   useWebSocket();
+  
+  // Handle animations for agent movement and status changes
+  useOfficeAnimation();
 
   // Fetch initial data
   const agents = useAgents();

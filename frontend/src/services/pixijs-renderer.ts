@@ -1,4 +1,5 @@
 import * as PIXI from 'pixi.js';
+import * as TWEEN from 'tween.js';
 import { Agent, RoomType } from '../types';
 
 export interface Room {
@@ -10,6 +11,7 @@ export interface Room {
   color: number;
 }
 
+// Room layout with precise positioning
 const ROOMS: Room[] = [
   { name: 'lobby', x: 50, y: 400, width: 150, height: 100, color: 0x4a5568 },
   { name: 'work_desk_1', x: 250, y: 400, width: 80, height: 80, color: 0x2d3748 },
@@ -27,6 +29,8 @@ export class PixiJSRenderer {
   private app: PIXI.Application | null = null;
   private stage: PIXI.Container | null = null;
   private agentSprites: Map<string, PIXI.Container> = new Map();
+  private tweens: Map<string, TWEEN.Tween<{ x: number; y: number }>> = new Map();
+  private animationFrameId: number | null = null;
 
   async init(container: HTMLElement): Promise<void> {
     this.app = new PIXI.Application({
@@ -41,6 +45,15 @@ export class PixiJSRenderer {
     this.stage = this.app.stage;
 
     this.drawOfficeLayout();
+    this.startAnimationLoop();
+  }
+
+  private startAnimationLoop(): void {
+    const animate = () => {
+      TWEEN.update();
+      this.animationFrameId = requestAnimationFrame(animate);
+    };
+    this.animationFrameId = requestAnimationFrame(animate);
   }
 
   private drawOfficeLayout(): void {
@@ -121,9 +134,42 @@ export class PixiJSRenderer {
   updateAgent(agent: Agent): void {
     const sprite = this.agentSprites.get(agent.id);
     if (sprite) {
-      sprite.x = agent.position_x;
-      sprite.y = agent.position_y;
+      // Update status badge color
+      const badge = sprite.children[2] as PIXI.Graphics;
+      if (badge) {
+        const newColor = this.getStatusColor(agent.status);
+        badge.clear();
+        badge.beginFill(newColor);
+        badge.drawCircle(0, 0, 6);
+        badge.endFill();
+      }
     }
+  }
+
+  animateAgent(agentId: string, toX: number, toY: number, duration: number = 2500): void {
+    const sprite = this.agentSprites.get(agentId);
+    if (!sprite) return;
+
+    // Cancel existing tween if any
+    const existingTween = this.tweens.get(agentId);
+    if (existingTween) {
+      existingTween.stop();
+    }
+
+    const startPos = { x: sprite.x, y: sprite.y };
+    const tween = new TWEEN.Tween(startPos)
+      .to({ x: toX, y: toY }, duration)
+      .easing(TWEEN.Easing.Quadratic.InOut)
+      .onUpdate(() => {
+        sprite.x = startPos.x;
+        sprite.y = startPos.y;
+      })
+      .onComplete(() => {
+        this.tweens.delete(agentId);
+      })
+      .start();
+
+    this.tweens.set(agentId, tween);
   }
 
   selectAgent(agentId: string): void {
@@ -172,6 +218,12 @@ export class PixiJSRenderer {
   }
 
   destroy(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+    // Stop all tweens
+    this.tweens.forEach(tween => tween.stop());
+    this.tweens.clear();
     this.app?.destroy();
   }
 }
