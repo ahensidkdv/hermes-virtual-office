@@ -10,5 +10,15 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          pixi: ['pixi.js'],
+          tween: ['tween.js'],
+          socketio: ['socket.io-client'],
+        }
+      }
+    }
   },
 })
