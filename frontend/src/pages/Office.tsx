@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useOfficeStore } from '../store/office.store';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useAgents } from '../hooks/useAgents';
@@ -23,7 +23,7 @@ export const OfficePage: React.FC = () => {
 
   const selectedAgent = agents.find(a => a.id === selectedAgentId) || null;
   const selectedTask = selectedAgent?.current_task_id 
-    ? tasks.find(t => t.id === selectedAgent.current_task_id)
+    ? (tasks.find(t => t.id === selectedAgent.current_task_id) || null)
     : null;
 
   const activeAgents = agents.filter(a => a.status !== 'idle').length;

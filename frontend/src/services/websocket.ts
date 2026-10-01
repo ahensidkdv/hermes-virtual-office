@@ -1,7 +1,6 @@
 import { io, Socket } from 'socket.io-client';
-import { AgentMoveEvent, AgentStatusEvent, TaskAssignedEvent } from '../types';
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+const WS_URL = (import.meta.env.VITE_WS_URL as string) || 'ws://localhost:3001';
 
 class WebSocketService {
   private socket: Socket | null = null;
