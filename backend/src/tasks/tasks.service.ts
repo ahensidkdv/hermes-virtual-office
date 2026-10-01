@@ -41,7 +41,9 @@ export class TasksService {
 
       return savedTask;
     } catch (error) {
-      this.logger.error(`Failed to create task: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : '';
+      this.logger.error(`Failed to create task: ${errorMessage}`, errorStack);
       throw error;
     }
   }

@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { TasksService } from '../tasks/tasks.service';
-import { CloudEvent } from './cloud-event.service';
+import { CloudEvent } from '../events/cloud-event.service';
 
 /**
  * Mock Manager Agent
@@ -45,13 +45,8 @@ export class MockManagerAgent implements OnModuleInit {
   async onModuleInit(): Promise<void> {
     try {
       // Subscribe to CloudEvents on hvo:events channel
-      await this.subscriber.subscribe('hvo:events', (err: Error | null, count: number) => {
-        if (err) {
-          this.logger.error(`Failed to subscribe: ${err.message}`);
-        } else {
-          this.logger.log(`Subscribed to hvo:events (${count} subscriptions)`);
-        }
-      });
+      await this.subscriber.subscribe('hvo:events');
+      this.logger.log('Subscribed to hvo:events channel');
 
       // Listen for messages
       this.subscriber.on('message', async (channel: string, message: string) => {
@@ -62,14 +57,16 @@ export class MockManagerAgent implements OnModuleInit {
               await this.handleTaskCreated(event);
             }
           } catch (error) {
-            this.logger.error(`Failed to parse event: ${error.message}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            this.logger.error(`Failed to parse event: ${errorMessage}`);
           }
         }
       });
 
       this.logger.log('MockManagerAgent initialized and listening for task.created events');
     } catch (error) {
-      this.logger.error(`Failed to initialize MockManagerAgent: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to initialize MockManagerAgent: ${errorMessage}`);
     }
   }
 
@@ -121,7 +118,8 @@ export class MockManagerAgent implements OnModuleInit {
 
       this.logger.log(`Task ${taskId} decomposed successfully into ${subtasks.length} subtasks`);
     } catch (error) {
-      this.logger.error(`Failed to decompose task ${taskId}: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to decompose task ${taskId}: ${errorMessage}`);
     } finally {
       this.concurrentAgents--;
 
@@ -183,7 +181,8 @@ export class MockManagerAgent implements OnModuleInit {
       await this.redis.publish('hvo:events', JSON.stringify(event));
       this.logger.debug(`Published task.assigned event for ${taskId}`);
     } catch (error) {
-      this.logger.error(`Failed to publish task.assigned event: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to publish task.assigned event: ${errorMessage}`);
     }
   }
 

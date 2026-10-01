@@ -96,7 +96,8 @@ export class CloudEventService {
       await this.redis.publish(channel, JSON.stringify(event));
       this.logger.debug(`Event published: ${event.type} (${event.id})`);
     } catch (error) {
-      this.logger.error(`Failed to publish event: ${error.message}`, error.stack);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to publish event: ${errorMessage}`);
       throw error;
     }
   }

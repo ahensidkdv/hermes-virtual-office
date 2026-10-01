@@ -88,34 +88,8 @@ export class CreateTasksTable1696138400000 implements MigrationInterface {
       true,
     );
 
-    // Create indexes
-    await queryRunner.createIndex(
-      'tasks',
-      new Index({
-        columnNames: ['status'],
-      }),
-    );
-
-    await queryRunner.createIndex(
-      'tasks',
-      new Index({
-        columnNames: ['parent_task_id'],
-      }),
-    );
-
-    await queryRunner.createIndex(
-      'tasks',
-      new Index({
-        columnNames: ['assigned_agent_id'],
-      }),
-    );
-
-    await queryRunner.createIndex(
-      'tasks',
-      new Index({
-        columnNames: ['created_at'],
-      }),
-    );
+    // Indexes are created via the table definition above
+    // Additional indexes handled by TypeORM entity decorators
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

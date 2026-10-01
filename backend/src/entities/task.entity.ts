@@ -18,7 +18,7 @@ export class Task {
   id: string = uuidv4();
 
   @Column('varchar', { length: 255 })
-  title: string;
+  title!: string;
 
   @Column('text', { nullable: true })
   description?: string;
@@ -42,10 +42,10 @@ export class Task {
   metadata?: Record<string, any>;
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
+  updated_at!: Date;
 
   @Column('timestamp', { nullable: true })
   completed_at?: Date;
