@@ -41,16 +41,16 @@ describe('OfficeGateway', () => {
 
   describe('handleConnection', () => {
     it('should add client to connected clients map', () => {
-      gateway.handleConnection(mockSocket);
+      gateway.handleConnection(mockSocket as any);
 
       expect(gateway.getConnectedClientsCount()).toBe(1);
       expect(mockSocket.emit).toHaveBeenCalledWith('connection:ack', expect.any(Object));
     });
 
     it('should increment connected clients count', () => {
-      gateway.handleConnection(mockSocket);
+      gateway.handleConnection(mockSocket as any);
       const socket2 = { id: 'socket-02', emit: jest.fn(), join: jest.fn(), leave: jest.fn() };
-      gateway.handleConnection(socket2);
+      gateway.handleConnection(socket2 as any);
 
       expect(gateway.getConnectedClientsCount()).toBe(2);
     });
@@ -59,7 +59,7 @@ describe('OfficeGateway', () => {
   describe('handleDisconnect', () => {
     it('should remove client from connected clients map', () => {
       gateway.handleConnection(mockSocket);
-      gateway.handleDisconnect(mockSocket);
+      gateway.handleDisconnect(mockSocket as any);
 
       expect(gateway.getConnectedClientsCount()).toBe(0);
     });
@@ -67,7 +67,7 @@ describe('OfficeGateway', () => {
 
   describe('subscribeAgentPosition', () => {
     it('should subscribe client to agent position room', () => {
-      gateway.subscribeAgentPosition(mockSocket, { agentId: 'agent-01' });
+      gateway.subscribeAgentPosition(mockSocket as any, { agentId: 'agent-01' });
 
       expect(mockSocket.join).toHaveBeenCalledWith('agent:agent-01:position');
     });
@@ -75,7 +75,7 @@ describe('OfficeGateway', () => {
 
   describe('unsubscribeAgentPosition', () => {
     it('should unsubscribe client from agent position room', () => {
-      gateway.unsubscribeAgentPosition(mockSocket, { agentId: 'agent-01' });
+      gateway.unsubscribeAgentPosition(mockSocket as any, { agentId: 'agent-01' });
 
       expect(mockSocket.leave).toHaveBeenCalledWith('agent:agent-01:position');
     });
@@ -83,7 +83,7 @@ describe('OfficeGateway', () => {
 
   describe('subscribeOfficeEvents', () => {
     it('should subscribe client to office events room', () => {
-      gateway.subscribeOfficeEvents(mockSocket);
+      gateway.subscribeOfficeEvents(mockSocket as any);
 
       expect(mockSocket.join).toHaveBeenCalledWith('office:events');
       expect(mockSocket.emit).toHaveBeenCalledWith('subscribe:ack', expect.any(Object));

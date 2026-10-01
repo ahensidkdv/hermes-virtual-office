@@ -5,6 +5,7 @@ import { TasksService } from './tasks.service';
 import { Task } from '../entities/task.entity';
 import { CloudEventService } from '../events/cloud-event.service';
 import { NotFoundException, ConflictException } from '@nestjs/common';
+import { CreateTaskDto, TaskPriority } from './dto/create-task.dto';
 
 describe('TasksService', () => {
   let service: TasksService;
@@ -17,15 +18,15 @@ describe('TasksService', () => {
     description: 'Research market trends',
     status: 'created',
     priority: 'high',
-    parent_task_id: null,
-    assigned_agent_id: null,
-    hermes_id: null,
+    parent_task_id: undefined,
+    assigned_agent_id: undefined,
+    hermes_id: undefined,
     metadata: {},
     created_at: new Date(),
     updated_at: new Date(),
-    completed_at: null,
+    completed_at: undefined,
     subtasks: [],
-  };
+  } as Task;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,9 +60,9 @@ describe('TasksService', () => {
 
   describe('createTask', () => {
     it('should create a task and publish event', async () => {
-      const createTaskDto = {
+      const createTaskDto: CreateTaskDto = {
         title: 'Conduct comprehensive market research',
-        priority: 'high',
+        priority: 'high' as TaskPriority,
         description: 'Research market trends',
       };
 
@@ -165,9 +166,9 @@ describe('TasksService', () => {
     });
 
     it('should set completed_at when status is done', async () => {
-      const inProgressTask = { ...mockTask, status: 'in_progress' as const };
-      jest.spyOn(repository, 'findOne').mockResolvedValue(inProgressTask);
-      jest.spyOn(repository, 'save').mockResolvedValue({ ...inProgressTask, status: 'done', completed_at: new Date() });
+      const reviewTask = { ...mockTask, status: 'review' as const };
+      jest.spyOn(repository, 'findOne').mockResolvedValue(reviewTask);
+      jest.spyOn(repository, 'save').mockResolvedValue({ ...reviewTask, status: 'done', completed_at: new Date() });
       jest.spyOn(cloudEventService, 'publishTaskStatusChanged').mockResolvedValue(undefined);
 
       const result = await service.updateTaskStatus(mockTask.id, { status: 'done' });
@@ -185,11 +186,11 @@ describe('TasksService', () => {
         id: `550e8400-e29b-41d4-a716-44665544000${idx}`,
         title,
         parent_task_id: mockTask.id,
-      }));
+      } as Task));
 
       jest.spyOn(repository, 'findOne').mockResolvedValue(mockTask);
       jest.spyOn(repository, 'create').mockReturnValue({} as Task);
-      jest.spyOn(repository, 'save').mockResolvedValue(createdSubtasks);
+      jest.spyOn(repository, 'save').mockResolvedValue(createdSubtasks as any);
 
       const result = await service.createSubtasks(mockTask.id, subtaskTitles);
 
