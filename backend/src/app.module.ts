@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Task } from './entities/task.entity';
+import { Agent } from './entities/agent.entity';
 import { TasksModule } from './tasks/tasks.module';
 import { AgentsModule } from './agents/agents.module';
+import { OfficeModule } from './office/office.module';
 import { HealthController } from './health.controller';
 
 @Module({
@@ -19,7 +21,7 @@ import { HealthController } from './health.controller';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'hvo',
-      entities: [Task],
+      entities: [Task, Agent],
       synchronize: false,
       logging: process.env.NODE_ENV !== 'production',
       migrations: ['dist/database/migrations/*{.ts,.js}'],
@@ -27,6 +29,7 @@ import { HealthController } from './health.controller';
     }),
     TasksModule,
     AgentsModule,
+    OfficeModule,
   ],
   controllers: [HealthController],
   providers: [],
