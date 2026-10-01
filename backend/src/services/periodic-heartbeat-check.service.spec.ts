@@ -16,10 +16,14 @@ describe('PeriodicHeartbeatCheckService', () => {
 
     const mockAgentsService = {
       listAgents: jest.fn().mockResolvedValue([
-        { id: 'agent-01', status: 'idle' },
-        { id: 'agent-02', status: 'idle' },
+        { id: 'agent-01', name: 'Agent 1', status: 'idle' } as any,
+        { id: 'agent-02', name: 'Agent 2', status: 'idle' } as any,
       ]),
-      getAgent: jest.fn().mockResolvedValue({ id: 'agent-01', status: 'idle' }),
+      getAgent: jest.fn().mockResolvedValue({
+        id: 'agent-01',
+        name: 'Agent 1',
+        status: 'idle',
+      } as any),
       updateAgentStatus: jest.fn().mockResolvedValue(undefined),
     };
 
@@ -136,8 +140,14 @@ describe('PeriodicHeartbeatCheckService', () => {
     it('should return last check time for agent', async () => {
       const now = new Date();
       // Simulate a check
-      agentsService.listAgents.mockResolvedValueOnce([{ id: 'agent-test', status: 'idle' }]);
-      agentsService.getAgent.mockResolvedValueOnce({ id: 'agent-test', status: 'idle' });
+      agentsService.listAgents.mockResolvedValueOnce([
+        { id: 'agent-test', name: 'Test', status: 'idle' } as any,
+      ]);
+      agentsService.getAgent.mockResolvedValueOnce({
+        id: 'agent-test',
+        name: 'Test',
+        status: 'idle',
+      } as any);
 
       await service.start();
       await new Promise((resolve) => setTimeout(resolve, 100));
