@@ -1,0 +1,14 @@
+{
+  "name": "hermes-virtual-office",
+  "version": "1.0.0",
+  "description": "**Real-time visualization & coordination system for autonomous AI agents managed by Hermes.**",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "commonjs"
+}
